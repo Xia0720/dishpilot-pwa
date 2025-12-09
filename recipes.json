@@ -22,6 +22,11 @@
         "qty": { "metric": "10g", "imperial": "1/2 oz" }
       },
       {
+        "name": { "en": "Milk", "es": "Leche" },
+        "type": "condiment",
+        "qty": { "metric": "50ml", "imperial": "1/4 cup" }
+      },
+      {
         "name": { "en": "Salt", "es": "Sal" },
         "type": "condiment",
         "qty": { "metric": "1 pinch", "imperial": "1 pinch" }
@@ -29,19 +34,19 @@
     ],
     "steps": {
       "en": [
-        "Whisk the eggs with salt and pepper.",
+        "Whisk the eggs with milk, salt and pepper.",
         "Melt butter in a non-stick pan over medium-low heat.",
         "Pour in the eggs and stir gently until soft curds form."
       ],
       "es": [
-        "Bata los huevos con sal y pimienta.",
+        "Bata los huevos con leche, sal y pimienta.",
         "Derrita la mantequilla en una sartén a fuego medio-bajo.",
         "Vierta los huevos y revuelva suavemente hasta que se formen cuajadas blandas."
       ]
     },
     "leftover_handling": {
-      "en": "If you have unused milk, add a splash to the eggs for extra fluffiness. If you have any unused chives, chop them for garnish.",
-      "es": "Si le queda leche sin usar, añada un chorrito a los huevos para que estén más esponjosos. Si le queda cebollino, píquelo para decorar."
+      "en": "If you have unused milk, use it to make a small latte. If you have any unused chives, chop them for garnish.",
+      "es": "Si le queda leche sin usar, úsela para hacer un pequeño café con leche. Si le queda cebollino, píquelo para decorar."
     }
   },
   {
@@ -87,6 +92,51 @@
     "leftover_handling": {
       "en": "Any remaining raw onion can be stored in an airtight container for future use in salads.",
       "es": "Cualquier cebolla cruda restante se puede almacenar en un recipiente hermético para usarla en ensaladas futuras."
+    }
+  },
+  {
+    "id": "R003",
+    "name": {
+      "en": "Roasted Squash with Herbs",
+      "es": "Calabaza Asada con Hierbas"
+    },
+    "difficulty": "Medium",
+    "prep_time": 10,
+    "cook_time": 40,
+    "match_ingredients": ["squash"],
+    "nutritional_tags": ["vegan", "side_dish", "roast"],
+    "ingredients": [
+      {
+        "name": { "en": "Squash", "es": "Calabaza" },
+        "type": "primary",
+        "qty": { "metric": "1 unit", "imperial": "1 unit" }
+      },
+      {
+        "name": { "en": "Olive Oil", "es": "Aceite de Oliva" },
+        "type": "primary",
+        "qty": { "metric": "30ml", "imperial": "2 tbsp" }
+      },
+      {
+        "name": { "en": "Thyme", "es": "Tomillo" },
+        "type": "condiment",
+        "qty": { "metric": "2 sprigs", "imperial": "2 sprigs" }
+      }
+    ],
+    "steps": {
+      "en": [
+        "Preheat oven to 400°F (200°C).",
+        "Halve the squash, scoop out seeds, and brush with olive oil.",
+        "Roast cut-side up for 40 minutes or until tender. Season with herbs."
+      ],
+      "es": [
+        "Precaliente el horno a 200°C (400°F).",
+        "Corte la calabaza por la mitad, retire las semillas y pincele con aceite de oliva.",
+        "Ase con el lado cortado hacia arriba durante 40 minutos o hasta que esté tierna. Sazone con hierbas."
+      ]
+    },
+    "leftover_handling": {
+      "en": "If you have extra thyme, place sprigs in water to keep fresh, or dry them for future use.",
+      "es": "Si tiene tomillo extra, coloque las ramitas en agua para mantenerlas frescas o séquelas para usarlas en el futuro."
     }
   }
 ]

@@ -1,54 +1,109 @@
-// Global variable to store all recipes
+// --- Global Variables and Constants ---
 let allRecipes = [];
-const RECIPES_FILE = 'recipes.json';
-const LANGUAGE = 'en'; // Default language for international users
+let model; // Global variable for the loaded AI model
+let currentUnitSystem = 'metric'; // Default unit system for international users ('metric' or 'imperial')
 
-// --- 1. Data Fetching Function ---
+const RECIPES_FILE = 'recipes.json';
+const LANGUAGE = 'en'; // Default language
+
+// --- 1. Data Fetching and Model Loading Function (Combined) ---
 async function fetchRecipes() {
+    // --- 1.1 Load Recipes Data ---
     try {
         const response = await fetch(RECIPES_FILE);
-        
         if (!response.ok) {
+            document.getElementById('recipes-container').innerHTML = 
+                `<p>ERROR: Failed to load recipes data. Check if 'recipes.json' exists and has valid syntax.</p>`;
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
         allRecipes = await response.json();
         console.log("Recipes loaded successfully:", allRecipes.length, "recipes found.");
-
-        // Initialize listeners and simulation
-        initEventListeners();
-        
     } catch (error) {
         console.error("Could not fetch the recipes:", error);
-        document.getElementById('recipes-container').innerHTML = 
-            `<p>ERROR: Failed to load recipes data. Please check the console (F12) for details.</p>`;
+        return; 
     }
+    
+    // --- 1.2 Load AI Model ---
+    try {
+        console.log("Loading MobileNet model...");
+        model = await mobilenet.load(); 
+        console.log("MobileNet model loaded successfully.");
+    } catch (error) {
+        console.error("Failed to load MobileNet model:", error);
+    }
+
+    // Initialize listeners and simulation after everything is loaded
+    initEventListeners();
 }
 
 // --- 2. Event Listeners (Triggers) ---
 function initEventListeners() {
-    // We bind the matching process to the image upload input for now
     document.getElementById('image-upload').addEventListener('change', handleImageUpload);
-    
-    // For demonstration, let's show a simulated result right away
+    // Simulate matching immediately for initial display
     simulateMatching(); 
 }
 
-// --- 3. Image Upload Handler (Will be extended with AI) ---
-function handleImageUpload(event) {
-    // In the final PWA, the image file is processed by TensorFlow.js here.
-    // For now, we only log the action.
-    console.log("Image uploaded. Starting AI recognition simulation...");
-    simulateMatching(); 
+// --- 3. Image Upload Handler (AI Core Logic) ---
+async function handleImageUpload(event) {
+    if (!model) {
+        console.warn("AI model not yet loaded. Please wait.");
+        return;
+    }
+
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // --- 1. Create Image Element ---
+    const imageElement = document.createElement('img');
+    imageElement.src = URL.createObjectURL(file);
+    imageElement.width = 224; 
+
+    imageElement.onload = async () => {
+        // --- 2. Run Classification ---
+        const predictions = await model.classify(imageElement, 5); 
+        console.log('AI Predictions:', predictions);
+
+        // --- 3. Extract and Clean Ingredient Names ---
+        let recognizedIngredients = predictions.map(p => {
+            return p.className.split(',')[0].trim().toLowerCase();
+        });
+        
+        // --- 4. Custom Mapping (Refinement) ---
+        // Map specific AI labels to general ingredient names used in our recipes.json
+        const mapping = {
+            "acorn squash": "squash",
+            "spaghetti squash": "squash",
+            "cucumber": "cucumber", // Specific item, kept as is
+            "granny smith": "apple",
+            "eggnog": "egg"
+        };
+        
+        recognizedIngredients = recognizedIngredients.map(item => mapping[item] || item);
+        recognizedIngredients = [...new Set(recognizedIngredients)]; 
+        
+        console.log("Mapped Ingredients:", recognizedIngredients);
+        
+        // --- 5. Clean Non-Food Items ---
+        const nonFoodTags = ["refrigerator", "plate rack", "table", "chair", "wall", "window", "cabinet", "shelf"];
+        
+        recognizedIngredients = recognizedIngredients.filter(item => 
+            !nonFoodTags.includes(item)
+        );
+        
+        console.log("Filtered Ingredients (Non-Food removed):", recognizedIngredients);
+        
+        // --- 6. Start Matching ---
+        const recommendedRecipes = findMatchingRecipes(recognizedIngredients);
+        displayRecipes(recommendedRecipes, recognizedIngredients);
+        displayIngredients(recognizedIngredients);
+    };
 }
 
 // --- 4. Simulation & Matching Function ---
 function simulateMatching() {
-    // === SIMULATION: Replace this array with the AI recognition result later ===
-    // This list will match recipe R001 (egg, butter) and R002 (tomato)
-    const availableIngredients = ["egg", "butter", "milk", "tomato", "onion", "parsley"]; 
+    // This list will match all 3 recipes now (egg, tomato, squash)
+    const availableIngredients = ["egg", "butter", "milk", "tomato", "onion", "parsley", "squash", "thyme"]; 
     console.log("Simulating available ingredients:", availableIngredients);
-    // =================================================================================
 
     const recommendedRecipes = findMatchingRecipes(availableIngredients);
     displayRecipes(recommendedRecipes, availableIngredients);
@@ -67,11 +122,10 @@ function findMatchingRecipes(availableList) {
             }
         }
 
-        // Rule: Recommend if at least 70% of main ingredients are available.
         const requiredCount = recipe.match_ingredients.length;
         const matchPercentage = requiredCount > 0 ? (matchedCount / requiredCount) : 0;
         
-        if (matchPercentage >= 0.7) { 
+        if (matchPercentage >= 0.3) { 
             recommended.push({
                 ...recipe,
                 matchPercentage: matchPercentage,
@@ -80,18 +134,28 @@ function findMatchingRecipes(availableList) {
         }
     }
 
-    // Sort by best match percentage (best utilization first)
     recommended.sort((a, b) => b.matchPercentage - a.matchPercentage);
     
     return recommended;
 }
 
-// --- 5. Display Functions ---
+// --- 5. Display Ingredients ---
 function displayIngredients(ingredients) {
     const list = document.getElementById('ingredient-list');
     list.innerHTML = ingredients.map(i => `<li>${i}</li>`).join('');
 }
 
+// --- 6. Recipe Card Listeners (Defined before displayRecipes to avoid ReferenceError) ---
+function initRecipeCardListeners() {
+    document.querySelectorAll('.view-recipe-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const recipeId = e.target.dataset.id;
+            viewRecipeDetails(recipeId);
+        });
+    });
+}
+
+// --- 7. Main Recipe Card Display Function ---
 function displayRecipes(recipes, availableIngredients) {
     const container = document.getElementById('recipes-container');
     container.innerHTML = ''; 
@@ -102,7 +166,6 @@ function displayRecipes(recipes, availableIngredients) {
     }
 
     recipes.forEach(recipe => {
-        // Find ingredients NOT used in this recipe (for the leftover card)
         const unusedIngredients = availableIngredients.filter(
             item => !recipe.match_ingredients.map(i => i.toLowerCase()).includes(item.toLowerCase())
         );
@@ -128,119 +191,102 @@ function displayRecipes(recipes, availableIngredients) {
 
         container.appendChild(recipeCard);
     });
-    // VITAL MODIFICATION: Call the new listener function here
+
     if (recipes.length > 0) {
-        initRecipeCardListeners(); // <--- 确保添加了这一行！
+        initRecipeCardListeners(); 
     }
+}
+
+// --- 8. View Recipe Details Function (Kitchen Mode) ---
+function viewRecipeDetails(recipeId) {
+    const recipe = allRecipes.find(r => r.id === recipeId);
+    if (!recipe) {
+        console.error("Recipe not found:", recipeId);
+        return;
+    }
+
+    const detailContainer = document.createElement('div');
+    detailContainer.id = 'recipe-detail-overlay';
+    detailContainer.dataset.recipeId = recipeId; 
+
+    const ingredientsHtml = recipe.ingredients.map(ing => {
+        const qty = ing.qty[currentUnitSystem]; 
+        const name = ing.name[LANGUAGE] || ing.name['en'];
+        return `<li><strong>${qty}</strong> ${name}</li>`;
+    }).join('');
+
+    const stepsHtml = recipe.steps[LANGUAGE].map((step, index) => {
+        return `<p><strong>STEP ${index + 1}:</strong> ${step}</p>`;
+    }).join('');
+
+    detailContainer.innerHTML = `
+        <div class="detail-content">
+            <button id="close-detail-btn">CLOSE [X]</button>
+            <button id="toggle-units-btn" data-units="${currentUnitSystem}">Switch to ${currentUnitSystem === 'metric' ? 'Imperial' : 'Metric'}</button>
+
+            <h2>${recipe.name[LANGUAGE]}</h2>
+            <p>Prep: ${recipe.prep_time} mins | Cook: ${recipe.cook_time} mins | Difficulty: ${recipe.difficulty}</p>
+            
+            <div class="sections">
+                <div class="ingredients-list">
+                    <h3>🛒 Ingredients (${currentUnitSystem})</h3>
+                    <ul>${ingredientsHtml}</ul>
+                </div>
+                <div class="steps-list">
+                    <h3>👩‍🍳 Instructions</h3>
+                    ${stepsHtml}
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(detailContainer);
+    
+    document.getElementById('close-detail-btn').addEventListener('click', () => {
+        document.body.removeChild(detailContainer);
+    });
+    
+    document.getElementById('toggle-units-btn').addEventListener('click', handleUnitToggle);
+}
+
+// --- 9. Unit Toggle Function ---
+function handleUnitToggle(e) {
+    if (currentUnitSystem === 'metric') {
+        currentUnitSystem = 'imperial';
+    } else {
+        currentUnitSystem = 'metric';
+    }
+    
+    const detailOverlay = document.getElementById('recipe-detail-overlay');
+    if (detailOverlay) {
+        const currentRecipeId = detailOverlay.dataset.recipeId; 
+        
+        document.body.removeChild(detailOverlay);
+
+        if (currentRecipeId) {
+             viewRecipeDetails(currentRecipeId);
+        }
+    }
+}
+
+// --- 10. Register Service Worker (PWA Feature) ---
+if ('serviceWorker' in navigator) {
+    // Determine the correct scope path for local vs. deployed environment
+    const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+    const scopePath = isLocal ? '/' : '/dishpilot-pwa/';
+    const scriptPath = isLocal ? './service-worker.js' : '/dishpilot-pwa/service-worker.js';
+
+    window.addEventListener('load', () => {
+        // Register the Service Worker
+        navigator.serviceWorker.register(scriptPath, { scope: scopePath })
+            .then(registration => {
+                console.log('SW registered with scope: ', registration.scope);
+            })
+            .catch(registrationError => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
 }
 
 // Start the application
 fetchRecipes();
-
-// --- 8. Unit Toggle Function ---
-function handleUnitToggle(e) {
-    // 1. Determine the new system
-    if (currentUnitSystem === 'metric') {
-        currentUnitSystem = 'imperial';
-    } else {
-        currentUnitSystem = 'metric';
-    }
-    
-    // 2. Get the current recipe ID from the button's context (e.g., store it temporarily)
-    // For simplicity here, we assume the user is viewing a detail page.
-    // In a production app, we would pass the ID through the button click or store it globally.
-    // We'll just rely on the existing ID if the detail page is open.
-    
-    // To cleanly update the overlay without complex state management:
-    // We get the ID from the currently open detail view, close it, and reopen it with the new unit.
-    const detailOverlay = document.getElementById('recipe-detail-overlay');
-    if (detailOverlay) {
-        // Simple way to get the ID from the URL or similar mechanism in a real PWA.
-        // For this demo, let's assume we capture the ID when viewRecipeDetails is called.
-        // **NOTE:** For simplicity in this demo, let's just close and rely on the user to re-open
-        // OR we can pass the ID through a data attribute on the overlay (complex).
-        // Let's rely on re-rendering the detail view completely by calling the function again,
-        // but we need to know WHICH recipe was open.
-        
-        // As a simpler workaround for this zero-cost prototype, we'll re-render the detail based on the last-viewed recipe.
-        // *****************************************************************************************************
-        // For the sake of simplicity and avoiding complex global state in a zero-code-experience tutorial:
-        // We will simply CLOSE the detail view and let the user re-open it to see the change.
-        // *****************************************************************************************************
-
-        const currentRecipeId = detailOverlay.dataset.recipeId; // Assuming we add this attribute in Action 8.1
-        
-        // Remove the old overlay
-        document.body.removeChild(detailOverlay);
-
-        // Re-render the detail page with the new unit system (if we know the ID)
-        if (currentRecipeId) {
-             viewRecipeDetails(currentRecipeId);
-        } else {
-             console.warn("Units changed, but complex state management needed to auto re-render detail. Please close and re-open the recipe.");
-        }
-    }
-}
-
-// We need to slightly modify Action 8.1's detailContainer creation to hold the ID:
-/*
-    // In Action 8.1, change this line:
-    detailContainer.id = 'recipe-detail-overlay';
-    // To this:
-    detailContainer.id = 'recipe-detail-overlay'; 
-    detailContainer.dataset.recipeId = recipeId; // Store the ID here
-*/
-
-// --- 8. Unit Toggle Function ---
-function handleUnitToggle(e) {
-    // 1. Determine the new system
-    if (currentUnitSystem === 'metric') {
-        currentUnitSystem = 'imperial';
-    } else {
-        currentUnitSystem = 'metric';
-    }
-    
-    // 2. Get the current recipe ID from the button's context (e.g., store it temporarily)
-    // For simplicity here, we assume the user is viewing a detail page.
-    // In a production app, we would pass the ID through the button click or store it globally.
-    // We'll just rely on the existing ID if the detail page is open.
-    
-    // To cleanly update the overlay without complex state management:
-    // We get the ID from the currently open detail view, close it, and reopen it with the new unit.
-    const detailOverlay = document.getElementById('recipe-detail-overlay');
-    if (detailOverlay) {
-        // Simple way to get the ID from the URL or similar mechanism in a real PWA.
-        // For this demo, let's assume we capture the ID when viewRecipeDetails is called.
-        // **NOTE:** For simplicity in this demo, let's just close and rely on the user to re-open
-        // OR we can pass the ID through a data attribute on the overlay (complex).
-        // Let's rely on re-rendering the detail view completely by calling the function again,
-        // but we need to know WHICH recipe was open.
-        
-        // As a simpler workaround for this zero-cost prototype, we'll re-render the detail based on the last-viewed recipe.
-        // *****************************************************************************************************
-        // For the sake of simplicity and avoiding complex global state in a zero-code-experience tutorial:
-        // We will simply CLOSE the detail view and let the user re-open it to see the change.
-        // *****************************************************************************************************
-
-        const currentRecipeId = detailOverlay.dataset.recipeId; // Assuming we add this attribute in Action 8.1
-        
-        // Remove the old overlay
-        document.body.removeChild(detailOverlay);
-
-        // Re-render the detail page with the new unit system (if we know the ID)
-        if (currentRecipeId) {
-             viewRecipeDetails(currentRecipeId);
-        } else {
-             console.warn("Units changed, but complex state management needed to auto re-render detail. Please close and re-open the recipe.");
-        }
-    }
-}
-
-// We need to slightly modify Action 8.1's detailContainer creation to hold the ID:
-/*
-    // In Action 8.1, change this line:
-    detailContainer.id = 'recipe-detail-overlay';
-    // To this:
-    detailContainer.id = 'recipe-detail-overlay'; 
-    detailContainer.dataset.recipeId = recipeId; // Store the ID here
-*/
