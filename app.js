@@ -128,7 +128,119 @@ function displayRecipes(recipes, availableIngredients) {
 
         container.appendChild(recipeCard);
     });
+    // VITAL MODIFICATION: Call the new listener function here
+    if (recipes.length > 0) {
+        initRecipeCardListeners(); // <--- 确保添加了这一行！
+    }
 }
 
 // Start the application
 fetchRecipes();
+
+// --- 8. Unit Toggle Function ---
+function handleUnitToggle(e) {
+    // 1. Determine the new system
+    if (currentUnitSystem === 'metric') {
+        currentUnitSystem = 'imperial';
+    } else {
+        currentUnitSystem = 'metric';
+    }
+    
+    // 2. Get the current recipe ID from the button's context (e.g., store it temporarily)
+    // For simplicity here, we assume the user is viewing a detail page.
+    // In a production app, we would pass the ID through the button click or store it globally.
+    // We'll just rely on the existing ID if the detail page is open.
+    
+    // To cleanly update the overlay without complex state management:
+    // We get the ID from the currently open detail view, close it, and reopen it with the new unit.
+    const detailOverlay = document.getElementById('recipe-detail-overlay');
+    if (detailOverlay) {
+        // Simple way to get the ID from the URL or similar mechanism in a real PWA.
+        // For this demo, let's assume we capture the ID when viewRecipeDetails is called.
+        // **NOTE:** For simplicity in this demo, let's just close and rely on the user to re-open
+        // OR we can pass the ID through a data attribute on the overlay (complex).
+        // Let's rely on re-rendering the detail view completely by calling the function again,
+        // but we need to know WHICH recipe was open.
+        
+        // As a simpler workaround for this zero-cost prototype, we'll re-render the detail based on the last-viewed recipe.
+        // *****************************************************************************************************
+        // For the sake of simplicity and avoiding complex global state in a zero-code-experience tutorial:
+        // We will simply CLOSE the detail view and let the user re-open it to see the change.
+        // *****************************************************************************************************
+
+        const currentRecipeId = detailOverlay.dataset.recipeId; // Assuming we add this attribute in Action 8.1
+        
+        // Remove the old overlay
+        document.body.removeChild(detailOverlay);
+
+        // Re-render the detail page with the new unit system (if we know the ID)
+        if (currentRecipeId) {
+             viewRecipeDetails(currentRecipeId);
+        } else {
+             console.warn("Units changed, but complex state management needed to auto re-render detail. Please close and re-open the recipe.");
+        }
+    }
+}
+
+// We need to slightly modify Action 8.1's detailContainer creation to hold the ID:
+/*
+    // In Action 8.1, change this line:
+    detailContainer.id = 'recipe-detail-overlay';
+    // To this:
+    detailContainer.id = 'recipe-detail-overlay'; 
+    detailContainer.dataset.recipeId = recipeId; // Store the ID here
+*/
+
+// --- 8. Unit Toggle Function ---
+function handleUnitToggle(e) {
+    // 1. Determine the new system
+    if (currentUnitSystem === 'metric') {
+        currentUnitSystem = 'imperial';
+    } else {
+        currentUnitSystem = 'metric';
+    }
+    
+    // 2. Get the current recipe ID from the button's context (e.g., store it temporarily)
+    // For simplicity here, we assume the user is viewing a detail page.
+    // In a production app, we would pass the ID through the button click or store it globally.
+    // We'll just rely on the existing ID if the detail page is open.
+    
+    // To cleanly update the overlay without complex state management:
+    // We get the ID from the currently open detail view, close it, and reopen it with the new unit.
+    const detailOverlay = document.getElementById('recipe-detail-overlay');
+    if (detailOverlay) {
+        // Simple way to get the ID from the URL or similar mechanism in a real PWA.
+        // For this demo, let's assume we capture the ID when viewRecipeDetails is called.
+        // **NOTE:** For simplicity in this demo, let's just close and rely on the user to re-open
+        // OR we can pass the ID through a data attribute on the overlay (complex).
+        // Let's rely on re-rendering the detail view completely by calling the function again,
+        // but we need to know WHICH recipe was open.
+        
+        // As a simpler workaround for this zero-cost prototype, we'll re-render the detail based on the last-viewed recipe.
+        // *****************************************************************************************************
+        // For the sake of simplicity and avoiding complex global state in a zero-code-experience tutorial:
+        // We will simply CLOSE the detail view and let the user re-open it to see the change.
+        // *****************************************************************************************************
+
+        const currentRecipeId = detailOverlay.dataset.recipeId; // Assuming we add this attribute in Action 8.1
+        
+        // Remove the old overlay
+        document.body.removeChild(detailOverlay);
+
+        // Re-render the detail page with the new unit system (if we know the ID)
+        if (currentRecipeId) {
+             viewRecipeDetails(currentRecipeId);
+        } else {
+             console.warn("Units changed, but complex state management needed to auto re-render detail. Please close and re-open the recipe.");
+        }
+    }
+}
+
+// We need to slightly modify Action 8.1's detailContainer creation to hold the ID:
+/*
+    // In Action 8.1, change this line:
+    detailContainer.id = 'recipe-detail-overlay';
+    // To this:
+    detailContainer.id = 'recipe-detail-overlay'; 
+    detailContainer.dataset.recipeId = recipeId; // Store the ID here
+*/

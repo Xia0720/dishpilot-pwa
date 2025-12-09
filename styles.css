@@ -63,3 +63,85 @@ body {
     font-size: 12px;
     color: #6c757d;
 }
+/* --- Phase 4: Kitchen Mode Overlay Styles --- */
+
+#recipe-detail-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000f0; /* Dark, semi-transparent background */
+    z-index: 1000; /* Ensure it is on top of everything */
+    overflow-y: auto; /* Allow scrolling */
+    color: white; /* Light text for dark mode */
+}
+
+.detail-content {
+    max-width: 90%;
+    margin: 5% auto;
+    padding: 30px;
+    background-color: #1a1a1a; /* Dark content background */
+    border-radius: 10px;
+}
+
+#close-detail-btn, #toggle-units-btn {
+    position: absolute;
+    top: 15px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #e84949;
+    color: white;
+}
+
+#close-detail-btn {
+    right: 15px;
+}
+
+#toggle-units-btn {
+    right: 100px; /* Position next to the close button */
+    background-color: #4CAF50;
+}
+
+.sections {
+    display: flex;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+.ingredients-list, .steps-list {
+    flex: 1;
+}
+
+.steps-list p {
+    line-height: 1.8;
+    font-size: 1.1em;
+    padding: 10px 0;
+    border-bottom: 1px solid #333;
+}
+
+.ingredients-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.ingredients-list li {
+    padding: 8px 0;
+    font-size: 1.1em;
+}
+
+/* Adjust for smaller screens */
+@media (max-width: 768px) {
+    .sections {
+        flex-direction: column;
+    }
+    #toggle-units-btn {
+        position: relative;
+        display: block;
+        margin: 10px 0;
+        right: auto;
+    }
+}
