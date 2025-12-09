@@ -1,0 +1,92 @@
+[
+  {
+    "id": "R001",
+    "name": {
+      "en": "Perfect Scrambled Eggs",
+      "es": "Huevos Revueltos Perfectos"
+    },
+    "difficulty": "Easy",
+    "prep_time": 5,
+    "cook_time": 5,
+    "match_ingredients": ["egg", "butter"],
+    "nutritional_tags": ["high_protein", "quick_meal"],
+    "ingredients": [
+      {
+        "name": { "en": "Egg", "es": "Huevo" },
+        "type": "primary",
+        "qty": { "metric": "3 units", "imperial": "3 units" }
+      },
+      {
+        "name": { "en": "Butter", "es": "Mantequilla" },
+        "type": "primary",
+        "qty": { "metric": "10g", "imperial": "1/2 oz" }
+      },
+      {
+        "name": { "en": "Salt", "es": "Sal" },
+        "type": "condiment",
+        "qty": { "metric": "1 pinch", "imperial": "1 pinch" }
+      }
+    ],
+    "steps": {
+      "en": [
+        "Whisk the eggs with salt and pepper.",
+        "Melt butter in a non-stick pan over medium-low heat.",
+        "Pour in the eggs and stir gently until soft curds form."
+      ],
+      "es": [
+        "Bata los huevos con sal y pimienta.",
+        "Derrita la mantequilla en una sartén a fuego medio-bajo.",
+        "Vierta los huevos y revuelva suavemente hasta que se formen cuajadas blandas."
+      ]
+    },
+    "leftover_handling": {
+      "en": "If you have unused milk, add a splash to the eggs for extra fluffiness. If you have any unused chives, chop them for garnish.",
+      "es": "Si le queda leche sin usar, añada un chorrito a los huevos para que estén más esponjosos. Si le queda cebollino, píquelo para decorar."
+    }
+  },
+  {
+    "id": "R002",
+    "name": {
+      "en": "Simple Tomato Soup",
+      "es": "Sopa de Tomate Sencilla"
+    },
+    "difficulty": "Easy",
+    "prep_time": 10,
+    "cook_time": 20,
+    "match_ingredients": ["tomato", "onion", "vegetable stock"],
+    "nutritional_tags": ["vegan", "low_fat", "soup"],
+    "ingredients": [
+      {
+        "name": { "en": "Tomato", "es": "Tomate" },
+        "type": "primary",
+        "qty": { "metric": "500g", "imperial": "1.1 lb" }
+      },
+      {
+        "name": { "en": "Onion", "es": "Cebolla" },
+        "type": "primary",
+        "qty": { "metric": "1 unit", "imperial": "1 unit" }
+      },
+      {
+        "name": { "en": "Vegetable Stock", "es": "Caldo de Verduras" },
+        "type": "primary",
+        "qty": { "metric": "500ml", "imperial": "2 cups" }
+      }
+    ],
+    "steps": {
+      "en": [
+        "Chop the tomatoes and onion.",
+        "Sauté the onion in a pot until soft.",
+        "Add tomatoes and stock, simmer for 15 minutes, then blend until smooth."
+      ],
+      "es": [
+        "Picar los tomates y la cebolla.",
+        "Sofría la cebolla en una olla hasta que esté suave.",
+        "Agregue los tomates y el caldo, cocine a fuego lento durante 15 minutos y luego licúe hasta que quede suave."
+      ]
+    },
+    "leftover_handling": {
+      "en": "Any remaining raw onion can be stored in an airtight container for future use in salads.",
+      "es": "Cualquier cebolla cruda restante se puede almacenar en un recipiente hermético para usarla en ensaladas futuras."
+    }
+  }
+]

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DishPilot - Fridge Assistant</title>
+    <link rel="stylesheet" href="styles.css"> 
+</head>
+<body>
+    <div id="app-container">
+        <h1>Welcome to DishPilot</h1>
+        <p>Upload a photo of your fridge to get started.</p>
+
+        <input type="file" id="image-upload" accept="image/*">
+        
+        <hr>
+
+        <div id="results-display">
+            <h2>Your Ingredients:</h2>
+            <ul id="ingredient-list"></ul>
+            
+            <hr>
+
+            <h2>Recommended Recipes:</h2>
+            <div id="recipes-container"></div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
